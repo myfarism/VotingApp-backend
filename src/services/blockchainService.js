@@ -703,6 +703,29 @@ class BlockchainService {
       throw error;
     }
   }
+
+  static async getUserByEmail(email) {
+    try {
+      console.log('🔍 Checking if email exists on blockchain...');
+      console.log('   Email:', email);
+
+      const contract = blockchainConfig.getContract();
+      
+      // Check emailRegistered mapping
+      const isRegistered = await contract.emailRegistered(email);
+      
+      if (isRegistered) {
+        throw new Error('Email already registered');
+      }
+
+      console.log('✅ Email not registered');
+      return { registered: false };
+    } catch (error) {
+      console.error('❌ Email check error:', error);
+      throw error;
+    }
+  }
+
 }
 
 module.exports = BlockchainService;

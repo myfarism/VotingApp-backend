@@ -4,6 +4,8 @@ const EmailService = require('../services/emailService');
 const OTPService = require('../services/otpService');
 const ResponseFormatter = require('../utils/responseFormatter');
 const jwt = require('jsonwebtoken');
+const EmailValidator = require('../middleware/emailValidator');
+
 
 class AuthController {
   /**
@@ -24,6 +26,20 @@ class AuthController {
         });
       }
 
+      // Email domain validation - TAMBAHAN BARU
+      const emailValidation = EmailValidator.validateDomain(email);
+      if (!emailValidation.isValid) {
+        // return ResponseFormatter.validationError(res, {
+        //   email: emailValidation.message,
+        // });
+        return res.status(400).json({
+          success: false,
+          message: emailValidation.message,
+          data: null,
+          timestamp: new Date().toISOString(),
+        })
+      }
+
       // Password strength validation
       if (password.length < 8) {
         return ResponseFormatter.validationError(res, {
@@ -41,6 +57,16 @@ class AuthController {
         return ResponseFormatter.error(res, 'NIM already registered', 400);
       } catch (error) {
         // User not found - good, we can proceed
+      }
+
+      try {
+        await BlockchainService.getUserByEmail(email);
+        // If we reach here, email check passed (not registered)
+      } catch (error) {
+        if (error.message.includes('Email already registered')) {
+          return ResponseFormatter.error(res, 'Email already registered', 400);
+        }
+        throw error; // Re-throw other errors
       }
 
       // Create and fund wallet

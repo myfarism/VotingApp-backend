@@ -19,6 +19,7 @@ const adminRoutes = require('./src/routes/adminRoutes'); // ✅ NEW
 const app = express();
 
 // Middleware
+app.set('trust proxy', true);
 app.use(helmet());
 app.use(cors({
   origin: process.env.CORS_ORIGIN || '*',
@@ -36,6 +37,9 @@ const limiter = rateLimit({
   message: 'Too many requests from this IP, please try again later',
   standardHeaders: true,
   legacyHeaders: false,
+  validate: {
+    trustProxy: false, // Disable trust proxy validation
+  },
 });
 
 app.use('/api/', limiter);
