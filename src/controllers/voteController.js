@@ -25,6 +25,8 @@ class VoteController {
       // Cast vote on blockchain
       const result = await BlockchainService.castVote(candidateId, encryptedPrivateKey);
 
+      console.log('📊 Vote details:', result);
+
       console.log('✅ Vote cast successfully');
 
       return ResponseFormatter.success(

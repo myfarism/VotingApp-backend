@@ -2,12 +2,13 @@ const express = require('express');
 const router = express.Router();
 const AdminController = require('../controllers/adminController');
 const { authenticateAdmin } = require('../middleware/authMiddleware');
+const upload = require('../middleware/uploadMiddleware');
 
 // All admin routes require admin authentication
 // For now, we'll use basic auth since admin is just owner wallet
 
 // Candidate Management
-router.post('/candidate', AdminController.addCandidate);
+router.post('/candidate', upload.single('photo'), AdminController.addCandidate);
 router.put('/candidate/:id', AdminController.updateCandidate);
 router.delete('/candidate/:id', AdminController.deactivateCandidate);
 
