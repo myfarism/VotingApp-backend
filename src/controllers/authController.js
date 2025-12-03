@@ -5,7 +5,27 @@ const OTPService = require('../services/otpService');
 const ResponseFormatter = require('../utils/responseFormatter');
 const jwt = require('jsonwebtoken');
 const EmailValidator = require('../middleware/emailValidator');
+const fs = require('fs');
+const path = require('path');
+const KEY_STORE_FILE = path.join(__dirname, '../datastore/key_store.json');
 
+function loadKeyStore() {
+  if (!fs.existsSync(KEY_STORE_FILE)) return {};
+  try {
+    const text = fs.readFileSync(KEY_STORE_FILE, 'utf8');
+    // Jika file kosong, return objek kosong
+    if (!text.trim()) return {};
+    return JSON.parse(text);
+  } catch (e) {
+    // Jika file tidak valid, auto return obj kosong saja (dan bisa log error)
+    console.error("Key store file corrupted or empty. Reinitializing.", e);
+    return {};
+  }
+}
+
+function saveKeyStore(store) {
+  fs.writeFileSync(KEY_STORE_FILE, JSON.stringify(store, null, 2));
+}
 
 class AuthController {
   /**
@@ -174,6 +194,14 @@ class AuthController {
       // Send success email
       await EmailService.sendRegistrationSuccess(email, pendingData.username);
 
+      const keyStore = loadKeyStore();
+      keyStore[pendingData.nim] = {
+        encryptedPrivateKey: pendingData.encryptedPrivateKey,
+        email: pendingData.email,
+        walletAddress: pendingData.walletAddress
+      };
+      saveKeyStore(keyStore);
+
       // Generate JWT token
       const token = jwt.sign(
         {
@@ -269,10 +297,15 @@ class AuthController {
         });
       }
 
+      const keyStore = loadKeyStore();
+      const keyRecord = keyStore[nim];  
+      console.log('keyRecord:', keyRecord);
+
       console.log('🔐 Login attempt for:', nim);
 
       // Verify credentials via blockchain
       const loginResult = await BlockchainService.login(nim, password);
+      console.log('Login result:', loginResult);
 
       if (!loginResult.success) {
         return ResponseFormatter.error(res, 'Invalid credentials', 401);
@@ -308,6 +341,7 @@ class AuthController {
           prodi: userInfo.prodi,
           walletAddress: userInfo.walletAddress,
           hasVoted: hasVoted,
+          encryptedPrivateKey: keyRecord ? keyRecord.encryptedPrivateKey : null,
         },
       }, 'Login successful');
     } catch (error) {

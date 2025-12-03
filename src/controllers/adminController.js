@@ -9,7 +9,8 @@ class AdminController {
    */
   static async addCandidate(req, res, next) {
     try {
-      const { id, name, description, imageUrl, prodi } = req.body;
+      const { id, name, description, prodi } = req.body;
+      let imageUrl = req.body.imageUrl || '';
 
       // Validation
       if (!id || !name || !prodi) {
@@ -18,6 +19,10 @@ class AdminController {
           name: name ? null : 'Candidate name is required',
           prodi: prodi ? null : 'Prodi is required',
         });
+      }
+
+      if (req.file) {
+        imageUrl = `/candidates/${req.file.filename}`;
       }
 
       console.log('➕ Adding candidate...');
@@ -53,6 +58,7 @@ class AdminController {
           txHash: receipt.hash,
           blockNumber: receipt.blockNumber,
           gasUsed: receipt.gasUsed.toString(),
+          imageUrl: imageUrl,
         },
         'Candidate added successfully',
         201

@@ -36,6 +36,7 @@ class CandidateController {
       console.log('📋 Fetching candidates for prodi:', prodi);
 
       const candidates = await BlockchainService.getCandidatesByProdi(prodi);
+      // console.log('Candidates:', candidates);
 
       console.log(`✅ Found ${candidates.length} candidates for ${prodi}`);
 

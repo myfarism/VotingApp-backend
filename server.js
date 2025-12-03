@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const helmet = require('helmet');
 const compression = require('compression');
 const morgan = require('morgan');
@@ -29,6 +30,11 @@ app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('combined'));
+app.use(
+  "/candidates",
+  express.static(path.join(process.cwd(), "public", "candidates"))
+);
+
 
 // Rate limiting
 const limiter = rateLimit({
