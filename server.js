@@ -16,6 +16,7 @@ const voteRoutes = require('./src/routes/voteRoutes');
 const candidateRoutes = require('./src/routes/candidateRoutes');
 const auditRoutes = require('./src/routes/auditRoutes');
 const adminRoutes = require('./src/routes/adminRoutes'); // ✅ NEW
+const testCryptoRoutes = require('./src/routes/testCryptoRoutes');
 
 const app = express();
 
@@ -68,6 +69,7 @@ app.use(`${apiPrefix}/vote`, voteRoutes);
 app.use(`${apiPrefix}/candidates`, candidateRoutes);
 app.use(`${apiPrefix}/audit`, auditRoutes);
 app.use(`${apiPrefix}/admin`, adminRoutes); // ✅ NEW
+app.use(`${apiPrefix}/test`, testCryptoRoutes);
 
 // 404 handler
 app.use((req, res) => {
