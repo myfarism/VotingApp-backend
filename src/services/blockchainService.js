@@ -348,6 +348,7 @@ class BlockchainService {
     try {
       const contract = blockchainConfig.getContract();
       const stats = await contract.getContractStats();
+      console.log('Contract stats:', stats.toString());
 
       return {
         totalUsers: stats[0].toString(),
